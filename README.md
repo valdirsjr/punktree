@@ -2,7 +2,7 @@
 
 Visualização interativa da história do punk rock — da origem nos anos 50 até os dias atuais. Mais de 65 bandas organizadas em 8 eras, com bios, influências e conexões clicáveis.
 
-**[→ Ver ao vivo](https://valdirsjr.github.io/punk-tree)**
+**[→ Ver ao vivo](https://valdirsjr.github.io/punktree)**
 
 ---
 
