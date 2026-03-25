@@ -4,6 +4,9 @@ Visualização interativa da história do punk rock — da origem nos anos 50 at
 
 **[→ Ver ao vivo](https://valdirsjr.github.io/punktree)**
 
+
+![screenshot](screenshot.png)
+
 ---
 
 ## O que é
