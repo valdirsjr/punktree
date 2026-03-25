@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore Genealógica do Punk — Interativa</title>
+<title>Árvore Genealógica do Punk v2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0f0e0d;--surface:#1a1816;--card:#201e1b;
   --border:rgba(255,255,255,.07);--text:#e6e2d8;--muted:#7a7568;
-  --radius:8px
 }
-body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
 header{padding:1.5rem 2rem 1rem;border-bottom:0.5px solid var(--border)}
 h1{font-size:1.6rem;font-weight:500;letter-spacing:-.01em}
 h1 span{color:#D85A30}
@@ -32,35 +31,26 @@ h1 span{color:#D85A30}
 .pt-edge{transition:stroke-width .12s,opacity .12s}
 .pt-edge.dimmed{opacity:.03!important}
 .pt-edge.highlighted{stroke-width:2px!important;opacity:.95!important}
-#pt-bio{
-  background:var(--card);
-  border-top:0.5px solid var(--border);
-  padding:1.25rem 2rem;
-  min-height:140px
-}
+#pt-bio{background:var(--card);border-top:0.5px solid var(--border);padding:1.25rem 2rem;min-height:140px}
 #pt-bio-header{display:flex;align-items:baseline;gap:12px;margin-bottom:.5rem}
 #pt-bio-name{font-size:1.1rem;font-weight:500;color:var(--text)}
 #pt-bio-era{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:99px;border:0.5px solid var(--border)}
 #pt-bio-text{font-size:.82rem;color:var(--muted);line-height:1.7;max-width:900px}
 #pt-bio-chips{margin-top:.75rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .pt-chip-label{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
-.pt-chip{
-  font-size:.68rem;padding:2px 10px;border-radius:99px;
-  border:0.5px solid var(--border);color:var(--muted);
-  cursor:pointer;background:transparent;transition:border-color .1s,color .1s
-}
+.pt-chip{font-size:.68rem;padding:2px 10px;border-radius:99px;border:0.5px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:border-color .1s,color .1s}
 .pt-chip:hover{color:var(--text)}
 footer{text-align:center;padding:.75rem;font-size:.65rem;color:var(--muted);letter-spacing:.08em;border-top:0.5px solid var(--border)}
 </style>
 </head>
 <body>
 <header>
-  <h1>Árvore Genealógica do <span>Punk</span></h1>
-  <div class="sub">Da origem aos dias atuais · 1950s → 2026 · Clique em qualquer banda</div>
+  <h1>Árvore Genealógica do <span>Punk</span> <span style="font-size:1rem;color:#7a7568">v2</span></h1>
+  <div class="sub">90+ bandas · Brasil · Japão · América Latina · Mundo · Clique em qualquer banda</div>
 </header>
 <div id="pt-legend"></div>
 <div id="pt-hint">Clique numa banda para ver bio e destacar influências · Arraste para navegar</div>
-<div id="pt-canvas-wrap"><svg id="pt-svg" viewBox="0 0 1600 920" width="1600"></svg></div>
+<div id="pt-canvas-wrap"><svg id="pt-svg"></svg></div>
 <div id="pt-bio">
   <div id="pt-bio-header">
     <div id="pt-bio-name" style="color:#7a7568">Selecione uma banda</div>
@@ -69,109 +59,170 @@ footer{text-align:center;padding:.75rem;font-size:.65rem;color:var(--muted);lett
   <div id="pt-bio-text">Clique em qualquer nó da árvore para ver bio detalhada, influências e bandas influenciadas.</div>
   <div id="pt-bio-chips"></div>
 </div>
-<footer>Árvore genealógica do punk · 60+ bandas · Clique nos chips para navegar entre as influências</footer>
+<footer>Árvore genealógica do punk v2 · 90+ bandas · Layout automático</footer>
 <script>
-const ERA_META = {
-  roots:   {label:'Raízes 1950s',       c:'#1D9E75',f:'rgba(29,158,117,.12)',t:'#5DCAA5'},
-  proto:   {label:'Proto-punk 67–75',   c:'#D85A30',f:'rgba(216,90,48,.13)', t:'#F0997B'},
-  wave1:   {label:'1ª onda 76–79',      c:'#E24B4A',f:'rgba(226,75,74,.12)', t:'#F09595'},
-  postpunk:{label:'Post-punk 78–85',    c:'#7F77DD',f:'rgba(127,119,221,.12)',t:'#AFA9EC'},
-  hc:      {label:'Hardcore 80–88',     c:'#D4537E',f:'rgba(212,83,126,.12)', t:'#ED93B1'},
-  alt90:   {label:'Alt/Pop-punk 88–00', c:'#BA7517',f:'rgba(186,117,23,.12)', t:'#EF9F27'},
-  indie00: {label:'Indie/Revival 00–15',c:'#639922',f:'rgba(99,153,34,.12)',  t:'#97C459'},
-  today:   {label:'Hoje 2016→',         c:'#378ADD',f:'rgba(55,138,221,.14)', t:'#85B7EB'},
+const ERA_META={
+  roots:   {label:'Raízes 1950s',       c:'#1D9E75',f:'rgba(29,158,117,.12)', t:'#5DCAA5', y:20},
+  proto:   {label:'Proto-punk 67–75',   c:'#D85A30',f:'rgba(216,90,48,.13)',  t:'#F0997B', y:130},
+  wave1:   {label:'1ª onda 76–79',      c:'#E24B4A',f:'rgba(226,75,74,.12)',  t:'#F09595', y:240},
+  postpunk:{label:'Post-punk 78–85',    c:'#7F77DD',f:'rgba(127,119,221,.12)',t:'#AFA9EC', y:350},
+  hc:      {label:'Hardcore 80–88',     c:'#D4537E',f:'rgba(212,83,126,.12)', t:'#ED93B1', y:460},
+  alt90:   {label:'Alt/Pop-punk 88–00', c:'#BA7517',f:'rgba(186,117,23,.12)', t:'#EF9F27', y:570},
+  indie00: {label:'Indie/Revival 00–15',c:'#639922',f:'rgba(99,153,34,.12)',  t:'#97C459', y:680},
+  today:   {label:'Hoje 2016→',         c:'#378ADD',f:'rgba(55,138,221,.14)', t:'#85B7EB', y:800},
 };
 
-const BANDS=[
- {id:'blues',  era:'roots',   name:'Blues & R&B',       x:30,  y:20, w:120,bio:'Raiz de tudo. Ritmo sincopado, guitarra elétrica crua e letras de resistência negra americana. Formaram o DNA do rock e, por consequência, do punk.',inf:[]},
- {id:'rock50', era:'roots',   name:'Rock n Roll 50s',   x:165, y:20, w:125,bio:'Chuck Berry, Bo Diddley e Little Richard simplificaram o blues em energia pura. Essa velocidade e atitude foram direto para o proto-punk.',inf:['blues']},
- {id:'garage', era:'roots',   name:'Garage Rock 60s',   x:305, y:20, w:130,bio:'Sonics, Seeds, Standells: rock amador, gravado no garagem, sem produção polida. Antecipou o DIY punk décadas antes do nome existir.',inf:['rock50']},
- {id:'british',era:'roots',   name:'British Invasion',  x:450, y:20, w:135,bio:'Kinks, The Who e Rolling Stones trouxeram agressividade e distorção ao pop. Pete Townshend destruindo guitarras é proto-punk puro.',inf:['blues','rock50']},
- {id:'velvet', era:'roots',   name:'Velvet Underground',x:600, y:20, w:160,bio:'Lou Reed e John Cale introduziram dissonância, letras sobre drogas e sexo, e gravações cruas. A influência mais citada em todo o pós-punk e art-punk.',inf:['blues']},
- {id:'who',    era:'roots',   name:'The Who',           x:775, y:20, w:100,bio:'Power chords, shows destrutivos e a ópera-rock Tommy. Pete Townshend inventou a postura punk antes de existir o punk.',inf:['british']},
- {id:'kinks',  era:'roots',   name:'The Kinks',         x:890, y:20, w:100,bio:'Ray Davies escreveu sobre a classe trabalhadora britânica com ironia afiada. Influência direta no Clash e Buzzcocks.',inf:['british']},
- {id:'sonics', era:'roots',   name:'The Sonics',        x:1005,y:20, w:105,bio:'Seattle, 1964. Guitar fuzz, grito gutural, zero refinamento. "Psycho" e "Strychnine" são punk 12 anos antes do punk.',inf:['garage']},
- {id:'nuggets',era:'roots',   name:'Nuggets 60s',       x:1125,y:20, w:115,bio:'Coletânea de 1972 que compilou o garage rock americano dos anos 60. Influenciou diretamente os Ramones e a cena CBGB.',inf:['garage','rock50']},
+const GAP=14;
+const START_X=30;
+const NODE_H=48;
 
- {id:'iggy',   era:'proto',   name:'Iggy & The Stooges',x:30,  y:130,w:160,bio:'Detroit, 1967. O padrinho. Iggy mergulhava na plateia, se cortava no palco e criava o template do frontman punk. Fun House (1970) é um dos discos mais importantes já gravados.',inf:['blues','rock50','velvet']},
- {id:'mc5',    era:'proto',   name:'MC5',               x:205, y:130,w:110,bio:'Detroit, 1968. Punk político antes do punk. "Kick Out the Jams" é o primeiro grito punk. Manifestos de contracultura e energia de motim.',inf:['blues','rock50','garage']},
- {id:'nydolls',era:'proto',   name:'New York Dolls',    x:330, y:130,w:140,bio:'NY, 1971. Glam + raiva + sloppiness intencional. Malcolm McLaren os gerenciou antes dos Sex Pistols. Influência direta na estética punk britânica.',inf:['british','velvet','garage']},
- {id:'patti',  era:'proto',   name:'Patti Smith',       x:485, y:130,w:130,bio:'NY, 1973. Poesia beat + rock elétrico + feminismo. "Horses" (1975) é fundacional. Vocalista-poeta que abriu caminho para todo o post-punk intelectual.',inf:['velvet','british']},
- {id:'tele',   era:'proto',   name:'Television',        x:630, y:130,w:120,bio:'NY, 1973. Tom Verlaine e Richard Lloyd construíam guitarras entrelacadas e poéticas. Marquee Moon (1977) definiu o art-punk e influenciou todo pós-punk britânico.',inf:['velvet','garage']},
- {id:'hell',   era:'proto',   name:'Richard Hell',      x:765, y:130,w:130,bio:'NY, 1975. Inventou a moda punk (cabelo espetado, roupas rasgadas) antes dos Sex Pistols. "Blank Generation" antecipou o nihilismo punk.',inf:['velvet','patti']},
- {id:'dictats',era:'proto',   name:'The Dictators',     x:910, y:130,w:130,bio:'NY, 1973. Humor, cultura pop e rock pesado. Considerados pelos Ramones como influência direta. Proto-punk americano menos conhecido mas crucial.',inf:['garage','rock50']},
- {id:'cbgb',   era:'proto',   name:'CBGB (cena NY)',    x:1055,y:130,w:130,bio:'Clube em NY onde nasceu o punk americano. Ramones, Talking Heads, Television, Patti Smith — todos estrearam ali. O mais importante clube da história do rock.',inf:['velvet','patti','tele']},
- {id:'iggsolo',era:'proto',   name:'Iggy Pop (solo)',   x:1200,y:130,w:130,bio:'Com David Bowie produzindo, Iggy fez "The Idiot" e "Lust for Life" (1977). "Lust for Life" é o riff de abertura mais reconhecível do punk. Influência enorme no pub rock australiano.',inf:['iggy']},
+const BANDS_DEF=[
+  {id:'blues',  era:'roots',   name:'Blues & R&B',         w:120, bio:'Raiz de tudo. Ritmo sincopado, guitarra elétrica crua e letras de resistência negra americana. Formaram o DNA do rock e, por consequência, do punk.',inf:[]},
+  {id:'rock50', era:'roots',   name:'Rock n Roll 50s',      w:125, bio:'Chuck Berry, Bo Diddley e Little Richard simplificaram o blues em energia pura. Essa velocidade e atitude foram direto para o proto-punk.',inf:['blues']},
+  {id:'garage', era:'roots',   name:'Garage Rock 60s',      w:130, bio:'Sonics, Seeds, Standells: rock amador, gravado no garagem, sem produção polida. Antecipou o DIY punk décadas antes do nome existir.',inf:['rock50']},
+  {id:'british',era:'roots',   name:'British Invasion',     w:135, bio:'Kinks, The Who e Rolling Stones trouxeram agressividade e distorção ao pop. Pete Townshend destruindo guitarras é proto-punk puro.',inf:['blues','rock50']},
+  {id:'velvet', era:'roots',   name:'Velvet Underground',   w:155, bio:'Lou Reed e John Cale introduziram dissonância, letras sobre drogas e sexo, e gravações cruas. A influência mais citada em todo o pós-punk e art-punk.',inf:['blues']},
+  {id:'who',    era:'roots',   name:'The Who',               w:100, bio:'Power chords, shows destrutivos e a ópera-rock Tommy. Pete Townshend inventou a postura punk antes de existir o punk.',inf:['british']},
+  {id:'kinks',  era:'roots',   name:'The Kinks',             w:100, bio:'Ray Davies escreveu sobre a classe trabalhadora britânica com ironia afiada. Influência direta no Clash e Buzzcocks.',inf:['british']},
+  {id:'sonics', era:'roots',   name:'The Sonics',            w:105, bio:'Seattle, 1964. Guitar fuzz, grito gutural, zero refinamento. "Psycho" e "Strychnine" são punk 12 anos antes do punk.',inf:['garage']},
+  {id:'nuggets',era:'roots',   name:'Nuggets 60s',           w:115, bio:'Coletânea de 1972 que compilou o garage rock americano dos anos 60. Influenciou diretamente os Ramones e a cena CBGB.',inf:['garage','rock50']},
+  {id:'saicos', era:'roots',   name:'Los Saicos (PE)',        w:130, bio:'Lima, Peru, 1964. Proto-punk peruano anterior ao MC5 e aos Stooges. "Demolición" (1965) é pura raiva distorcida e caos. Redescobertos décadas depois como precursores mundiais do punk.',inf:['garage','rock50']},
 
- {id:'pistols',era:'wave1',   name:'Sex Pistols',       x:30,  y:240,w:140,bio:'London, 1975. O big bang do punk britânico. "Anarchy in the UK" e "God Save the Queen" eram declarações de guerra ao establishment. Existiram 2 anos e mudaram tudo.',inf:['iggy','mc5','nydolls','hell']},
- {id:'clash',  era:'wave1',   name:'The Clash',         x:185, y:240,w:120,bio:'London, 1976. O punk mais político e musicalmente ambicioso. Misturaram reggae, ska, dub e rockabilly. London Calling (1979) é frequentemente eleito o melhor álbum de todos os tempos.',inf:['mc5','iggy','kinks','british']},
- {id:'ramones',era:'wave1',   name:'Ramones',           x:320, y:240,w:120,bio:'Queens, NY, 1974. 2 minutos, 3 acordes, 180bpm. Inventaram a fórmula punk. Influenciaram absolutamente todo mundo que veio depois. "Hey Ho Let\'s Go."',inf:['dictats','garage','british','sonics']},
- {id:'damned', era:'wave1',   name:'The Damned',        x:455, y:240,w:120,bio:'London, 1976. Primeiro single punk britânico ("New Rose"). Depois migraram para o goth. Dave Vanian é um ícone do estilo gótico. "Machine Gun Etiquette" é clássico.',inf:['nydolls','iggy','mc5']},
- {id:'buzzc',  era:'wave1',   name:'Buzzcocks',         x:590, y:240,w:130,bio:'Manchester, 1976. Criaram o pop-punk e o modelo de selo independente com "Spiral Scratch". Pete Shelley escreveu as melhores canções de amor do punk — sem especificar gênero.',inf:['nydolls','ramones','pistols']},
- {id:'wire',   era:'wave1',   name:'Wire',              x:735, y:240,w:100,bio:'London, 1976. O punk mais minimalista e cerebral. "Pink Flag" (1977): 21 músicas em 35 minutos. Influência em R.E.M., Elastica, Blur e incontáveis bandas indie.',inf:['velvet','tele','patti']},
- {id:'siouxs', era:'wave1',   name:'Siouxsie & Banshees',x:850,y:240,w:175,bio:'London, 1976. Punk art que virou goth. Siouxsie Sioux inventou o visual e o som do goth rock. "Spellbound" e "Hong Kong Garden" são marcos.',inf:['velvet','damned','pistols']},
- {id:'jam',    era:'wave1',   name:'The Jam',           x:1040,y:240,w:100,bio:'Woking, 1972. Punk com influências mod e soul. Paul Weller obcecado com Kinks e Who. "Going Underground" chegou ao #1. Base do britpop dos anos 90.',inf:['kinks','who','pistols']},
- {id:'xray',   era:'wave1',   name:'X-Ray Spex',        x:1155,y:240,w:130,bio:'London, 1977. Poly Styrene — anti-glamour total. "Oh Bondage Up Yours!" é um dos melhores debuts punk. Saxofone discordante e letras sobre consumismo.',inf:['pistols','velvet']},
- {id:'clashb', era:'wave1',   name:'The Saints (AU)',   x:1300,y:240,w:100,bio:'Brisbane, Austrália, 1973. Um dos primeiros grupos punk do mundo, anterior aos Sex Pistols. Influência direta no pub rock australiano e no Amyl.',inf:['ramones','iggy','mc5']},
+  {id:'iggy',   era:'proto',   name:'Iggy & The Stooges',   w:160, bio:'Detroit, 1967. O padrinho. Iggy mergulhava na plateia, se cortava no palco e criava o template do frontman punk. Fun House (1970) é um dos discos mais importantes já gravados.',inf:['blues','rock50','velvet']},
+  {id:'mc5',    era:'proto',   name:'MC5',                   w:100, bio:'Detroit, 1968. Punk político antes do punk. "Kick Out the Jams" é o primeiro grito punk. Manifestos de contracultura e energia de motim.',inf:['blues','rock50','garage']},
+  {id:'nydolls',era:'proto',   name:'New York Dolls',        w:140, bio:'NY, 1971. Glam + raiva + sloppiness intencional. Malcolm McLaren os gerenciou antes dos Sex Pistols. Influência direta na estética punk britânica.',inf:['british','velvet','garage']},
+  {id:'patti',  era:'proto',   name:'Patti Smith',           w:130, bio:'NY, 1973. Poesia beat + rock elétrico + feminismo. "Horses" (1975) é fundacional. Vocalista-poeta que abriu caminho para todo o post-punk intelectual.',inf:['velvet','british']},
+  {id:'tele',   era:'proto',   name:'Television',            w:120, bio:'NY, 1973. Tom Verlaine e Richard Lloyd construíam guitarras entrelacadas e poéticas. Marquee Moon (1977) definiu o art-punk e influenciou todo pós-punk britânico.',inf:['velvet','garage']},
+  {id:'hell',   era:'proto',   name:'Richard Hell',          w:120, bio:'NY, 1975. Inventou a moda punk (cabelo espetado, roupas rasgadas) antes dos Sex Pistols. "Blank Generation" antecipou o nihilismo punk.',inf:['velvet','patti']},
+  {id:'dictats',era:'proto',   name:'The Dictators',         w:130, bio:'NY, 1973. Humor, cultura pop e rock pesado. Considerados pelos Ramones como influência direta. Proto-punk americano menos conhecido mas crucial.',inf:['garage','rock50']},
+  {id:'cbgb',   era:'proto',   name:'CBGB (cena NY)',        w:130, bio:'Clube em NY onde nasceu o punk americano. Ramones, Talking Heads, Television, Patti Smith — todos estrearam ali. O mais importante clube da história do rock.',inf:['velvet','patti','tele']},
+  {id:'iggsolo',era:'proto',   name:'Iggy Pop (solo)',       w:130, bio:'Com David Bowie produzindo, Iggy fez "The Idiot" e "Lust for Life" (1977). "Lust for Life" é o riff de abertura mais reconhecível do punk. Influência enorme no pub rock australiano.',inf:['iggy']},
+  {id:'restos', era:'proto',   name:'Restos de Nada (BR)',   w:155, bio:'São Paulo, 1978. A primeira banda punk brasileira. Douglas Viscaino e Clemente Tadeu inspirados em MC5, Stooges e Sex Pistols. Precursores de tudo que veio depois na cena paulistana.',inf:['iggy','mc5','pistols','garage']},
 
- {id:'joydiv', era:'postpunk',name:'Joy Division',      x:30,  y:350,w:130,bio:'Manchester, 1976. "Unknown Pleasures" (1979): um dos álbuns mais influentes já feitos. Peter Hook, a bassline mais icônica do pós-punk. Ian Curtis e a voz do abismo. Viraram New Order.',inf:['velvet','wire','siouxs','pistols']},
- {id:'gang4',  era:'postpunk',name:'Gang of Four',      x:175, y:350,w:130,bio:'Leeds, 1977. Funk-punk político e angular. "Entertainment!" (1979) é a bíblia do pós-punk. IDLES: "IDLES does not exist without Gang of Four." Influência em Nirvana, RHCP, St. Vincent.',inf:['clash','wire','velvet']},
- {id:'mag',    era:'postpunk',name:'Magazine',          x:320, y:350,w:110,bio:'Manchester, 1977. Howard Devoto saiu do Buzzcocks para fazer art-rock. Keyboards sombrios, letras intelectuais. Proto-goth definitivo.',inf:['buzzc','wire','velvet','joydiv']},
- {id:'fall',   era:'postpunk',name:'The Fall',          x:445, y:350,w:100,bio:'Manchester, 1976. Mark E. Smith e seus 60+ músicos trocados em 40 anos. Post-punk avant-garde repetitivo e obsessivo. A banda mais influente que nunca foi famosa.',inf:['wire','velvet','kinks']},
- {id:'pil',    era:'postpunk',name:'Public Image Ltd',  x:560, y:350,w:145,bio:'London, 1978. John Lydon pós-Sex Pistols fez algo radical: dub, krautrock e noise. "Metal Box" (1979) é mais experimental que qualquer coisa dos Pistols.',inf:['pistols','clash','velvet','joydiv']},
- {id:'cure',   era:'postpunk',name:'The Cure',          x:720, y:350,w:110,bio:'Crawley, 1976. Começaram punk e viraram goth. De "Boys Don\'t Cry" a "Disintegration" é uma das trajetórias mais radicais. Robert Smith inventou um estilo que dura até hoje.',inf:['siouxs','wire','joydiv','velvet']},
- {id:'talkh',  era:'postpunk',name:'Talking Heads',     x:845, y:350,w:145,bio:'NY, 1975. Funk + punk + world music + art-rock. David Byrne e Brian Eno fizeram "Fear of Music" e "Remain in Light". Base para o art-punk dos anos 2000.',inf:['velvet','patti','gang4','tele']},
- {id:'xtc',    era:'postpunk',name:'XTC',               x:1005,y:350,w:100,bio:'Swindon, 1976. Punk pop que virou new wave complexa. Andy Partridge escrevia melodias pop disfarçadas em rock angular. "Black Sea" é essencial.',inf:['buzzc','wire','kinks','jam']},
- {id:'xband',  era:'postpunk',name:'X (Los Angeles)',   x:1120,y:350,w:130,bio:'LA, 1977. Punk americano com harmonias vocais country e letras poéticas. "Los Angeles" (1980) produzido por Ray Manzarek do Doors. Punk + Americana.',inf:['ramones','iggy','clash']},
- {id:'pere',   era:'postpunk',name:'Pere Ubu',          x:1265,y:350,w:100,bio:'Cleveland, 1975. Art-punk e noise rock avant-garde. David Thomas inventou o vocal mais estranho do punk. Influência enorme na cena alternativa americana dos anos 80.',inf:['velvet','iggy','mc5']},
+  {id:'pistols',era:'wave1',   name:'Sex Pistols',           w:130, bio:'London, 1975. O big bang do punk britânico. "Anarchy in the UK" e "God Save the Queen" eram declarações de guerra ao establishment. Existiram 2 anos e mudaram tudo.',inf:['iggy','mc5','nydolls','hell']},
+  {id:'clash',  era:'wave1',   name:'The Clash',             w:120, bio:'London, 1976. O punk mais político e musicalmente ambicioso. Misturaram reggae, ska, dub e rockabilly. London Calling (1979) é frequentemente eleito o melhor álbum de todos os tempos.',inf:['mc5','iggy','kinks','british']},
+  {id:'ramones',era:'wave1',   name:'Ramones',               w:120, bio:'Queens, NY, 1974. 2 minutos, 3 acordes, 180bpm. Inventaram a fórmula punk. Influenciaram absolutamente todo mundo que veio depois.',inf:['dictats','garage','british','sonics']},
+  {id:'damned', era:'wave1',   name:'The Damned',            w:120, bio:'London, 1976. Primeiro single punk britânico ("New Rose"). Depois migraram para o goth. Dave Vanian é um ícone do estilo gótico.',inf:['nydolls','iggy','mc5']},
+  {id:'buzzc',  era:'wave1',   name:'Buzzcocks',             w:120, bio:'Manchester, 1976. Criaram o pop-punk e o modelo de selo independente com "Spiral Scratch". Pete Shelley escreveu as melhores canções de amor do punk — sem especificar gênero.',inf:['nydolls','ramones','pistols']},
+  {id:'wire',   era:'wave1',   name:'Wire',                  w:100, bio:'London, 1976. O punk mais minimalista e cerebral. "Pink Flag" (1977): 21 músicas em 35 minutos. Influência em R.E.M., Elastica, Blur e incontáveis bandas indie.',inf:['velvet','tele','patti']},
+  {id:'siouxs', era:'wave1',   name:'Siouxsie & Banshees',  w:165, bio:'London, 1976. Punk art que virou goth. Siouxsie Sioux inventou o visual e o som do goth rock.',inf:['velvet','damned','pistols']},
+  {id:'jam',    era:'wave1',   name:'The Jam',               w:100, bio:'Woking, 1972. Punk com influências mod e soul. Paul Weller obcecado com Kinks e Who. "Going Underground" chegou ao #1.',inf:['kinks','who','pistols']},
+  {id:'xray',   era:'wave1',   name:'X-Ray Spex',            w:120, bio:'London, 1977. Poly Styrene — anti-glamour total. "Oh Bondage Up Yours!" é um dos melhores debuts punk. Saxofone discordante e letras sobre consumismo.',inf:['pistols','velvet']},
+  {id:'clashb', era:'wave1',   name:'The Saints (AU)',        w:130, bio:'Brisbane, Austrália, 1973. Um dos primeiros grupos punk do mundo, anterior aos Sex Pistols. Influência direta no pub rock australiano e no Amyl.',inf:['ramones','iggy','mc5']},
+  {id:'inocentes',era:'wave1', name:'Inocentes (BR)',         w:130, bio:'São Paulo, 1981. Pilar fundador do punk brasileiro. Clemente Nascimento é figura central da cena. "Miséria e Fome" e "Pânico em SP" são hinos. Participaram do Grito Suburbano (1982), o primeiro disco punk do Brasil.',inf:['restos','pistols','ramones','buzzc']},
+  {id:'colera', era:'wave1',   name:'Cólera (BR)',            w:110, bio:'São Paulo, 1979. Pilar do punk brasileiro. Redson fundou o selo Estúdios Vermelhos. "Pela Paz em Todo Mundo" (1986) é clássico de mensagem pacifista e ecológica.',inf:['restos','inocentes','clash','pistols']},
 
- {id:'blackf', era:'hc',      name:'Black Flag',        x:30,  y:460,w:120,bio:'LA, 1977. Henry Rollins e Greg Ginn definiram o hardcore americano. "Damaged" (1981) é a pedra fundacional. Tour incessante, DIY absoluto. Influenciou Nirvana, Fugazi, toda cena indie.',inf:['ramones','iggy','mc5','pistols']},
- {id:'dkenn',  era:'hc',      name:'Dead Kennedys',     x:165, y:460,w:155,bio:'SF, 1978. Jello Biafra: o mais sarcástico dos cantores punk. "California Über Alles", "Holiday in Cambodia". Hardcore rápido com letras políticas que envergonhavam o hardcore britânico.',inf:['ramones','clash','xband']},
- {id:'minor',  era:'hc',      name:'Minor Threat',      x:335, y:460,w:130,bio:'Washington DC, 1980. Ian MacKaye criou o straight edge. Músicas de 90 segundos, energia devastadora. "Out of Step" definiu o hardcore da costa leste.',inf:['blackf','ramones','dkenn']},
- {id:'husker', era:'hc',      name:'Hüsker Dü',        x:480, y:460,w:125,bio:'Minneapolis, 1979. Hardcore que começou a absorver melodia e shoegaze. "Zen Arcade" (1984) foi o primeiro álbum duplo hardcore. Influenciaram Nirvana diretamente.',inf:['blackf','ramones','buzzc']},
- {id:'desc',   era:'hc',      name:'Descendents',       x:620, y:460,w:130,bio:'LA, 1977. Inventaram o pop-punk melódico. Músicas sobre adolescência, café e amor a 300bpm. "Milo Goes to College" (1982) é o álbum que Green Day cresceu ouvindo.',inf:['blackf','ramones','buzzc','husker']},
- {id:'bikini', era:'hc',      name:'Bikini Kill',       x:765, y:460,w:120,bio:'Olympia, 1990. Kathleen Hanna criou o riot grrrl. "Rebel Girl" é o hino. "Girls to the front." Influência direta em toda cena punk feminista contemporânea.',inf:['minor','blackf','patti']},
- {id:'fugazi', era:'hc',      name:'Fugazi',            x:900, y:460,w:110,bio:'DC, 1987. Ian MacKaye criou o post-hardcore DIY mais influente. Shows sem ingressos acima de $5. Sem major labels. "Repeater" (1990) é um dos álbuns mais importantes da história.',inf:['minor','gang4','wire','xband']},
- {id:'badrel', era:'hc',      name:'Bad Religion',      x:1025,y:460,w:130,bio:'LA, 1980. Punk melódico intelectual. Greg Graffin tem PhD em biologia evolutiva. "Suffer" (1988) revitalizou o skate punk. Fundaram a Epitaph Records.',inf:['desc','blackf','dkenn']},
- {id:'nofx',   era:'hc',      name:'NOFX',              x:1170,y:460,w:110,bio:'LA, 1983. Fat Mike e seu humor ácido definiram o skate punk californiano. Recusaram major labels por princípio. "Punk in Drublic" (1994) vendeu 1 milhão sem TV.',inf:['desc','badrel','dkenn']},
- {id:'misfits',era:'hc',      name:'Misfits',           x:1295,y:460,w:100,bio:'Lodi, NJ, 1977. Glenn Danzig criou o horror-punk. Crânio com relâmpago, letras de série B de terror. Influência em metal, punk e goth. A banda de merch mais vendida do punk.',inf:['damned','ramones','dkenn']},
+  {id:'joydiv', era:'postpunk',name:'Joy Division',          w:130, bio:'Manchester, 1976. "Unknown Pleasures" (1979): um dos álbuns mais influentes já feitos. Ian Curtis e a voz do abismo. Viraram New Order.',inf:['velvet','wire','siouxs','pistols']},
+  {id:'gang4',  era:'postpunk',name:'Gang of Four',          w:130, bio:'Leeds, 1977. Funk-punk político e angular. "Entertainment!" (1979) é a bíblia do pós-punk. IDLES: "IDLES does not exist without Gang of Four."',inf:['clash','wire','velvet']},
+  {id:'mag',    era:'postpunk',name:'Magazine',              w:110, bio:'Manchester, 1977. Howard Devoto saiu do Buzzcocks para fazer art-rock. Keyboards sombrios, letras intelectuais. Proto-goth definitivo.',inf:['buzzc','wire','velvet','joydiv']},
+  {id:'fall',   era:'postpunk',name:'The Fall',              w:100, bio:'Manchester, 1976. Mark E. Smith e seus 60+ músicos trocados em 40 anos. Post-punk avant-garde repetitivo e obsessivo. A banda mais influente que nunca foi famosa.',inf:['wire','velvet','kinks']},
+  {id:'pil',    era:'postpunk',name:'Public Image Ltd',      w:145, bio:'London, 1978. John Lydon pós-Sex Pistols fez algo radical: dub, krautrock e noise. "Metal Box" (1979) é mais experimental que qualquer coisa dos Pistols.',inf:['pistols','clash','velvet','joydiv']},
+  {id:'cure',   era:'postpunk',name:'The Cure',              w:110, bio:'Crawley, 1976. De "Boys Don\'t Cry" a "Disintegration" é uma das trajetórias mais radicais. Robert Smith inventou um estilo que dura até hoje.',inf:['siouxs','wire','joydiv','velvet']},
+  {id:'talkh',  era:'postpunk',name:'Talking Heads',         w:140, bio:'NY, 1975. Funk + punk + world music + art-rock. David Byrne e Brian Eno fizeram "Remain in Light". Base para o art-punk dos anos 2000.',inf:['velvet','patti','gang4','tele']},
+  {id:'xtc',    era:'postpunk',name:'XTC',                   w:100, bio:'Swindon, 1976. Punk pop que virou new wave complexa. Andy Partridge escrevia melodias pop disfarçadas em rock angular.',inf:['buzzc','wire','kinks','jam']},
+  {id:'xband',  era:'postpunk',name:'X (Los Angeles)',       w:130, bio:'LA, 1977. Punk americano com harmonias vocais country e letras poéticas. "Los Angeles" (1980) produzido por Ray Manzarek do Doors.',inf:['ramones','iggy','clash']},
+  {id:'pere',   era:'postpunk',name:'Pere Ubu',              w:110, bio:'Cleveland, 1975. Art-punk e noise rock avant-garde. David Thomas inventou o vocal mais estranho do punk. Influência enorme na cena americana dos anos 80.',inf:['velvet','iggy','mc5']},
+  {id:'violadores',era:'postpunk',name:'Los Violadores (AR)',w:160, bio:'Buenos Aires, 1980. Os mais importantes do punk latino-americano. Em plena ditadura, "Represión" foi o primeiro grito punk da Argentina. Pil Trafa e Stuka definiram o som e a atitude de toda uma geração.',inf:['pistols','clash','ramones','gang4']},
+  {id:'replicantes',era:'postpunk',name:'Os Replicantes (BR)',w:165, bio:'Porto Alegre, 1983. O nome é referência ao Blade Runner. Pioneiros do punk gaúcho com sonoridade new wave e pós-punk. Assinaram com a RCA nos anos 80.',inf:['colera','joydiv','wire','pistols']},
+  {id:'stalin', era:'postpunk',name:'The Stalin (JP)',        w:145, bio:'Tóquio, 1980. O mais extremo e provocador do punk japonês. Michiro Endo atirava cabeças de porco no palco. "Stop Jap" (1982) é um clássico. O nome "Stalin" era puro ato de provocação política.',inf:['pistols','gang4','pil','iggy']},
+  {id:'pinochetb',era:'postpunk',name:'Pinochet Boys (CL)',  w:150, bio:'Santiago, Chile, 1984. Pioneiros do punk chileno em plena ditadura de Pinochet. O próprio nome era um ato de provocação política. Organizaram o primeiro festival punk do Chile em 1986.',inf:['pistols','clash','violadores']},
 
- {id:'nirvana',era:'alt90',   name:'Nirvana',           x:30,  y:570,w:120,bio:'Aberdeen, WA, 1987. Kurt Cobain levou o hardcore melódico ao mainstream mundial. "Nevermind" (1991) matou o hair metal. Cobain citava Hüsker Dü e Gang of Four.',inf:['husker','blackf','pixies','buzzc']},
- {id:'pixies', era:'alt90',   name:'Pixies',            x:165, y:570,w:110,bio:'Boston, 1986. A dinâmica quiet-loud que Kurt Cobain copiou. "Doolittle" (1989) é perfeito. Frank Black + Kim Deal: a mais influente dupla compositora do indie dos anos 80.',inf:['velvet','husker','talkh','xtc']},
- {id:'greenday',era:'alt90',  name:'Green Day',         x:290, y:570,w:120,bio:'Berkeley, CA, 1987. "Dookie" (1994) vendeu 10 milhões. Billie Joe cresceu ouvindo Descendents e Buzzcocks. "American Idiot" é ópera-rock punk.',inf:['desc','buzzc','ramones','badrel']},
- {id:'offsp',  era:'alt90',   name:'The Offspring',     x:425, y:570,w:130,bio:'Garden Grove, CA, 1984. "Smash" (1994) vendeu 11 milhões — maior álbum indie de todos os tempos. "Come Out and Play" e "Self Esteem" são hinos.',inf:['badrel','nofx','desc','blackf']},
- {id:'rancid', era:'alt90',   name:'Rancid',            x:570, y:570,w:110,bio:'Berkeley, CA, 1991. Tim Armstrong misturou ska, punk e streetpunk. "...And Out Come the Wolves" (1995) é o disco de punk dos anos 90 mais respeitado pelos puristas.',inf:['clash','ramones','dkenn','nofx']},
- {id:'blink',  era:'alt90',   name:'blink-182',         x:695, y:570,w:120,bio:'San Diego, 1992. Pop-punk adolescente que definiu o gênero. "Enema of the State" (1999) vendeu 15 milhões. Humor escatológico e melodias impossíveis de tirar da cabeça.',inf:['desc','greenday','nofx','offsp']},
- {id:'agstme', era:'alt90',   name:'Against Me!',       x:830, y:570,w:130,bio:'Gainesville, FL, 1997. Folk punk + hardcore + letras de classe trabalhadora. Laura Jane Grace fez de "Transgender Dysphoria Blues" (2014) um ato de coragem radical.',inf:['fugazi','clash','minor','rancid']},
- {id:'sleater',era:'alt90',   name:'Sleater-Kinney',    x:975, y:570,w:155,bio:'Olympia, 1994. Carrie Brownstein e Corin Tucker criaram o post-riot grrrl mais sofisticado. "Dig Me Out" (1997) é o melhor álbum de rock dos anos 90 que muita gente não conhece.',inf:['bikini','patti','pixies','gang4']},
- {id:'sonic',  era:'alt90',   name:'Sonic Youth',       x:1145,y:570,w:130,bio:'NY, 1981. Thurston Moore e Kim Gordon reinventaram a afinação da guitarra. "Daydream Nation" (1988) é o álbum indie mais influente da história.',inf:['velvet','wire','pil','fall']},
- {id:'opiv',   era:'alt90',   name:'Operation Ivy',     x:1290,y:570,w:105,bio:'Berkeley, CA, 1987. Ska punk urgente e político. Tim Armstrong saiu daqui para formar o Rancid. Existiram 2 anos e influenciaram décadas de punk melódico.',inf:['clash','ramones','rancid']},
+  {id:'blackf', era:'hc',      name:'Black Flag',            w:120, bio:'LA, 1977. Henry Rollins e Greg Ginn definiram o hardcore americano. "Damaged" (1981) é a pedra fundacional. Tour incessante, DIY absoluto.',inf:['ramones','iggy','mc5','pistols']},
+  {id:'dkenn',  era:'hc',      name:'Dead Kennedys',         w:145, bio:'SF, 1978. Jello Biafra: o mais sarcástico dos cantores punk. "California Über Alles", "Holiday in Cambodia". Hardcore rápido com letras políticas afiadas.',inf:['ramones','clash','xband']},
+  {id:'minor',  era:'hc',      name:'Minor Threat',          w:130, bio:'Washington DC, 1980. Ian MacKaye criou o straight edge. Músicas de 90 segundos, energia devastadora. "Out of Step" definiu o hardcore da costa leste.',inf:['blackf','ramones','dkenn']},
+  {id:'husker', era:'hc',      name:'Hüsker Dü',            w:125, bio:'Minneapolis, 1979. Hardcore que começou a absorver melodia e shoegaze. "Zen Arcade" (1984) foi o primeiro álbum duplo hardcore. Influenciaram Nirvana diretamente.',inf:['blackf','ramones','buzzc']},
+  {id:'desc',   era:'hc',      name:'Descendents',           w:130, bio:'LA, 1977. Inventaram o pop-punk melódico. Músicas sobre adolescência, café e amor a 300bpm. "Milo Goes to College" (1982) é o álbum que Green Day cresceu ouvindo.',inf:['blackf','ramones','buzzc','husker']},
+  {id:'bikini', era:'hc',      name:'Bikini Kill',           w:120, bio:'Olympia, 1990. Kathleen Hanna criou o riot grrrl. "Rebel Girl" é o hino. "Girls to the front." Influência direta em toda cena punk feminista contemporânea.',inf:['minor','blackf','patti']},
+  {id:'fugazi', era:'hc',      name:'Fugazi',                w:110, bio:'DC, 1987. Ian MacKaye criou o post-hardcore DIY mais influente. Shows sem ingressos acima de $5. "Repeater" (1990) é um dos álbuns mais importantes da história.',inf:['minor','gang4','wire','xband']},
+  {id:'badrel', era:'hc',      name:'Bad Religion',          w:130, bio:'LA, 1980. Punk melódico intelectual. Greg Graffin tem PhD em biologia evolutiva. "Suffer" (1988) revitalizou o skate punk. Fundaram a Epitaph Records.',inf:['desc','blackf','dkenn']},
+  {id:'nofx',   era:'hc',      name:'NOFX',                  w:110, bio:'LA, 1983. Fat Mike e seu humor ácido definiram o skate punk californiano. "Punk in Drublic" (1994) vendeu 1 milhão sem TV.',inf:['desc','badrel','dkenn']},
+  {id:'misfits',era:'hc',      name:'Misfits',               w:100, bio:'Lodi, NJ, 1977. Glenn Danzig criou o horror-punk. Crânio com relâmpago, letras de série B de terror. A banda de merch mais vendida do punk.',inf:['damned','ramones','dkenn']},
+  {id:'ratos',  era:'hc',      name:'Ratos de Porão (BR)',   w:155, bio:'São Paulo, 1981. A maior banda punk brasileira. "Crucificados pelo Sistema" (1984) foi o primeiro álbum punk da América Latina. João Gordo e cia misturaram punk com thrash metal e fizeram turnês na Europa.',inf:['inocentes','colera','blackf','dkenn']},
+  {id:'devotos',era:'hc',      name:'Devotos do Ódio (BR)',  w:160, bio:'Recife, PE, 1988. O punk nordestino mais importante. Do Alto José do Pinho, periferia do Recife. Letras sobre realidade nordestina com violência e urgência do hardcore.',inf:['ratos','inocentes','blackf','minor']},
+  {id:'gism',   era:'hc',      name:'G.I.S.M. (JP)',         w:125, bio:'Tóquio, 1981. Hardcore/metal extremo e D-Beat japonês. Usavam balaclavas no palco 20 anos antes de qualquer outro. "Detestation" (1984) é um marco do hardcore mundial.',inf:['blackf','minor','damned','stalin']},
+  {id:'gauze',  era:'hc',      name:'Gauze (JP)',             w:120, bio:'Tóquio, 1981. Hardcore japonês cru e implacável — ainda ativo. Uma das bandas mais antigas do hardcore mundial em atividade contínua. Zero concessões ao mainstream em mais de 40 anos.',inf:['blackf','gism','minor','pistols']},
+  {id:'gastunk',era:'hc',      name:'Gastunk (JP)',           w:125, bio:'Japão, 1982. Punk/metal crossover japonês. Som mais pesado que qualquer outro punk japonês da época. Influência direta no crossover thrash e no metalcore japonês dos anos 90.',inf:['gism','gauze','misfits','blackf']},
+  {id:'laughin',era:'hc',      name:"Laughin' Nose (JP)",    w:150, bio:'Osaka, 1980. Uma das bandas punk mais antigas do Japão ainda em atividade. Começaram como hardcore e migraram para punk rock melódico. Mais de 40 anos de estrada.',inf:['pistols','ramones','gauze','blackf']},
 
- {id:'strokes',era:'indie00', name:'The Strokes',       x:30,  y:680,w:120,bio:'NY, 1998. Reviveram o garage rock no século XXI. "Is This It" (2001) é o álbum indie mais importante dos anos 2000. Julian Casablancas sobre o Velvet Underground para a geração MySpace.',inf:['velvet','tele','ramones','wire']},
- {id:'whites', era:'indie00', name:'White Stripes',     x:165, y:680,w:130,bio:'Detroit, 1997. Jack e Meg White reinventaram o blues-punk com dois instrumentos. "Elephant" (2003) é perfeito. Jack White é o mais importante guitarrista do rock dos anos 2000.',inf:['blues','garage','sonic','iggy']},
- {id:'proto',  era:'indie00', name:'Protomartyr',       x:310, y:680,w:130,bio:'Detroit, 2008. Joe Casey recita letras densas sobre decadência urbana sobre post-punk angular. "The Agent Intellect" (2015) é considerado o melhor álbum indie da década.',inf:['fall','joydiv','wire','gang4']},
- {id:'iceage', era:'indie00', name:'Iceage',            x:455, y:680,w:110,bio:'Copenhague, 2008. Punk sombrio e art-rock do norte europeu. "You\'re Nothing" (2013) é devastador. Elias Bender Rønnenfelt é o frontman punk mais carismático da sua geração.',inf:['joydiv','wire','cure','gang4']},
- {id:'parquet',era:'indie00', name:'Parquet Courts',    x:580, y:680,w:150,bio:'NY, 2011. The Fall meets Television meets Pavement. "Light Up Gold" (2012) foi a grande redescoberta do pós-punk intelectual americano.',inf:['fall','tele','strokes','sonic']},
- {id:'sleaf',  era:'indie00', name:'Sleaford Mods',     x:745, y:680,w:145,bio:'Nottingham, 2007. Jason Williamson cospe raiva sobre loops de laptop. Zero guitarra ao vivo. "Austerity Dogs" definiu o punk eletrônico da classe trabalhadora. Base para a geração pós-Brexit.',inf:['fall','pil','gang4','clash']},
- {id:'jeff',   era:'indie00', name:'Jeff Rosenstock',   x:905, y:680,w:155,bio:'NY, 1990. O mestre do pop-punk DIY do século XXI. Todos os álbuns free to download. "WORRY." (2016) e "NO DREAM" (2020) são dois dos melhores discos punk das últimas décadas.',inf:['agstme','desc','greenday','fugazi']},
- {id:'shame',  era:'indie00', name:'Shame',             x:1075,y:680,w:110,bio:'South London, 2014. O post-punk mais urgente da sua geração. "Songs of Praise" (2018) e "Drunk Tank Pink" (2021) mostram uma trajetória impressionante. Ao vivo são devastadores.',inf:['fall','gang4','fugazi','wire']},
- {id:'turnst', era:'indie00', name:'Turnstile',         x:1200,y:680,w:120,bio:'Baltimore, 2010. Hardcore que absorveu funk, R&B e shoegaze sem perder ferocidade. "Glow On" (2021) recebeu 9.0 do Pitchfork. A banda que abriu mais mentes para o hardcore.',inf:['minor','fugazi','blackf','desc']},
- {id:'cable',  era:'indie00', name:'Cable Ties',        x:1335,y:680,w:120,bio:'Melbourne, 2014. Trio australiano que atualiza o riot grrrl para falar de degradação ambiental e misoginia sistêmica. "Far Enough" (2020) foi elogiado como um dos melhores discos punk do ano.',inf:['bikini','sleater','blackf','clashb']},
+  {id:'nirvana',era:'alt90',   name:'Nirvana',               w:110, bio:'Aberdeen, WA, 1987. Kurt Cobain levou o hardcore melódico ao mainstream mundial. "Nevermind" (1991) matou o hair metal. Cobain citava Hüsker Dü e Gang of Four.',inf:['husker','blackf','pixies','buzzc']},
+  {id:'pixies', era:'alt90',   name:'Pixies',                w:110, bio:'Boston, 1986. A dinâmica quiet-loud que Kurt Cobain copiou. "Doolittle" (1989) é perfeito. A mais influente dupla compositora do indie dos anos 80.',inf:['velvet','husker','talkh','xtc']},
+  {id:'greenday',era:'alt90',  name:'Green Day',             w:115, bio:'Berkeley, CA, 1987. "Dookie" (1994) vendeu 10 milhões. Billie Joe cresceu ouvindo Descendents e Buzzcocks. "American Idiot" é ópera-rock punk.',inf:['desc','buzzc','ramones','badrel']},
+  {id:'offsp',  era:'alt90',   name:'The Offspring',         w:130, bio:'Garden Grove, CA, 1984. "Smash" (1994) vendeu 11 milhões — maior álbum indie de todos os tempos.',inf:['badrel','nofx','desc','blackf']},
+  {id:'rancid', era:'alt90',   name:'Rancid',                w:110, bio:'Berkeley, CA, 1991. Tim Armstrong misturou ska, punk e streetpunk. "...And Out Come the Wolves" (1995) é o disco de punk dos anos 90 mais respeitado pelos puristas.',inf:['clash','ramones','dkenn','nofx']},
+  {id:'blink',  era:'alt90',   name:'blink-182',             w:110, bio:'San Diego, 1992. Pop-punk adolescente que definiu o gênero. "Enema of the State" (1999) vendeu 15 milhões.',inf:['desc','greenday','nofx','offsp']},
+  {id:'agstme', era:'alt90',   name:'Against Me!',           w:125, bio:'Gainesville, FL, 1997. Folk punk + hardcore. Laura Jane Grace fez de "Transgender Dysphoria Blues" (2014) um ato de coragem radical.',inf:['fugazi','clash','minor','rancid']},
+  {id:'sleater',era:'alt90',   name:'Sleater-Kinney',        w:145, bio:'Olympia, 1994. Carrie Brownstein e Corin Tucker criaram o post-riot grrrl mais sofisticado. "Dig Me Out" (1997) é um dos melhores álbuns de rock dos anos 90.',inf:['bikini','patti','pixies','gang4']},
+  {id:'sonic',  era:'alt90',   name:'Sonic Youth',           w:125, bio:'NY, 1981. Thurston Moore e Kim Gordon reinventaram a afinação da guitarra. "Daydream Nation" (1988) é o álbum indie mais influente da história.',inf:['velvet','wire','pil','fall']},
+  {id:'opiv',   era:'alt90',   name:'Operation Ivy',         w:120, bio:'Berkeley, CA, 1987. Ska punk urgente e político. Tim Armstrong saiu daqui para formar o Rancid. Existiram 2 anos e influenciaram décadas.',inf:['clash','ramones','rancid']},
+  {id:'raimundos',era:'alt90', name:'Raimundos (BR)',         w:145, bio:'Brasília, 1991. Mistura única de punk rock dos Ramones com forró nordestino. "Espaço Sideral" e "Puteiro em João Pessoa" são hinos. Levaram o punk ao mainstream brasileiro dos anos 90.',inf:['ramones','clash','ratos','colera']},
+  {id:'deadfish',era:'alt90',  name:'Dead Fish (BR)',         w:130, bio:'Vitória, ES, 1991. A maior banda de hardcore melódico brasileiro. "Zero e Um" (2004) os catapultou para o mainstream. Influenciados por Bad Religion e Fugazi.',inf:['ratos','badrel','fugazi','husker']},
+  {id:'shonen', era:'alt90',   name:'Shonen Knife (JP)',      w:150, bio:'Osaka, 1981. Trio feminino de pop-punk. Kurt Cobain as chamou de "a melhor banda do mundo" e as convidou para abrir a turnê europeia do Nevermind. Influência direta dos Ramones filtrada pela cultura pop japonesa.',inf:['ramones','buzzc','pixies']},
+  {id:'bluehearts',era:'alt90',name:'Blue Hearts (JP)',       w:145, bio:'Tóquio, 1985. O pop-punk japonês mais popular de todos os tempos. "Linda Linda" é um dos maiores hinos do rock japonês. Dissolvidos em 1995, influenciaram toda a geração seguinte.',inf:['ramones','clash','buzzc']},
+  {id:'attaque',era:'alt90',   name:'Attaque 77 (AR)',        w:145, bio:'Buenos Aires, 1987. O punk argentino que chegou ao mainstream. "Hacelo por mí" tocou em todas as rádios. 36 anos de carreira. O maior nome do punk melódico argentino.',inf:['violadores','ramones','clash','greenday']},
+  {id:'dosmin', era:'alt90',   name:'2 Minutos (AR)',         w:135, bio:'Lanús, Buenos Aires, 1987. Punk melódico da periferia bonaerense. Letras sobre pobreza, alcoolismo e vida nas margens. Muito populares no Brasil também.',inf:['violadores','ramones','attaque','rancid']},
+  {id:'desorden',era:'alt90',  name:'Desorden Público (VE)', w:165, bio:'Caracas, Venezuela, 1984. O maior nome do ska-punk latinoamericano. Misturaram punk, ska, reggae e rock. Mais de 35 anos de atividade num dos países mais difíceis do continente.',inf:['clash','rancid','violadores','ramones']},
 
- {id:'idles',  era:'today',   name:'IDLES',             x:30,  y:800,w:110,bio:'Bristol, 2009. Joe Talbot transforma raiva pessoal em catarse coletiva. "IDLES does not exist without Gang of Four." "Brutalism" (2017) e "Joy as an Act of Resistance" (2018) são essenciais.',inf:['gang4','fugazi','fall','sleaf','proto']},
- {id:'fontain',era:'today',   name:'Fontaines D.C.',    x:155, y:800,w:155,bio:'Dublin, 2014. Cinco estudantes de música que escreviam poesia juntos. "Dogrel" (2019) nomeado ao Mercury Prize. "Romance" (2024) recebeu duas nomeações ao Grammy. Pós-punk com James Joyce.',inf:['joydiv','velvet','fall','cure','iceage','proto','strokes']},
- {id:'drycl',  era:'today',   name:'Dry Cleaning',      x:325, y:800,w:140,bio:'London, 2017. Florence Shaw recita textos surreais e banais sobre guitarras angulosas. "New Long Leg" (2021) é o álbum de pós-punk mais inventivo da década.',inf:['fall','talkh','wire','sleaf','gang4']},
- {id:'wetleg', era:'today',   name:'Wet Leg',           x:480, y:800,w:110,bio:'Isle of Wight, 2019. "Chaise Longue" viralizou antes do álbum existir. Humor seco e indie punk irreverente. Ganharam Grammy de Melhor Álbum Alternativo em 2023.',inf:['sleater','pixies','buzzc','strokes']},
- {id:'amyl',   era:'today',   name:'Amyl & the Sniffers',x:605,y:800,w:175,bio:'Melbourne, 2016. Amy Taylor + Bryce Wilson + Dec Martens + Gus Romer. EP "Giddy Up" criado em 12 horas. Pub punk com energia de Iggy Pop e atitude de AC/DC. "Guided by Angels" é o hino. Abriram para AC/DC em 2025. Três álbuns, três ARIAs.',inf:['iggsolo','iggy','ramones','sleaf','minor','clashb','cable']},
- {id:'viagra', era:'today',   name:'Viagra Boys',       x:795, y:800,w:135,bio:'Estocolmo, 2015. Sebastian Murphy cospe letras sobre masculinidade fracassada e vícios. Saxofone + baixo distorcido + vibe Nick Cave. "Cave World" (2022) é o mais original da cena pós-punk recente.',inf:['iggy','pil','fall','iceage','sonic']},
- {id:'yard',   era:'today',   name:'Yard Act',          x:945, y:800,w:120,bio:'Leeds, 2019. James Smith recita monólogos satíricos sobre vida britânica pós-Brexit sobre grooves funky. "The Overload" (2022) é comparado ao Fall e Pulp.',inf:['fall','sleaf','parquet','wire']},
- {id:'blackm', era:'today',   name:'Black Midi',        x:1080,y:800,w:120,bio:'London, 2017. Três garotos do BRIT School fazem matemática-rock / avant-punk caótico. "Schlagenheim" (2019) é extraordinário. Prog + hardcore + free jazz.',inf:['sonic','fall','pil','talkh','wire']},
- {id:'chubby', era:'today',   name:'Chubby & the Gang',x:1215,y:800,w:155,bio:'London, 2018. Charlie Manning-Walker e seus hardcore veteranos fazem Oi! punk moderno explosivo. "Speed Kills" (2020) foi uma das maiores surpresas da cena.',inf:['dkenn','blackf','damned','clash']},
+  {id:'strokes',era:'indie00', name:'The Strokes',           w:120, bio:'NY, 1998. Reviveram o garage rock no século XXI. "Is This It" (2001) é o álbum indie mais importante dos anos 2000.',inf:['velvet','tele','ramones','wire']},
+  {id:'whites', era:'indie00', name:'White Stripes',         w:130, bio:'Detroit, 1997. Jack e Meg White reinventaram o blues-punk com dois instrumentos. "Elephant" (2003) é perfeito.',inf:['blues','garage','sonic','iggy']},
+  {id:'proto',  era:'indie00', name:'Protomartyr',           w:130, bio:'Detroit, 2008. Joe Casey recita letras densas sobre decadência urbana. "The Agent Intellect" (2015) é considerado o melhor álbum indie da década.',inf:['fall','joydiv','wire','gang4']},
+  {id:'iceage', era:'indie00', name:'Iceage',                w:110, bio:'Copenhague, 2008. Punk sombrio e art-rock do norte europeu. "You\'re Nothing" (2013) é devastador.',inf:['joydiv','wire','cure','gang4']},
+  {id:'parquet',era:'indie00', name:'Parquet Courts',        w:145, bio:'NY, 2011. The Fall meets Television meets Pavement. "Light Up Gold" (2012) foi a grande redescoberta do pós-punk intelectual americano.',inf:['fall','tele','strokes','sonic']},
+  {id:'sleaf',  era:'indie00', name:'Sleaford Mods',         w:140, bio:'Nottingham, 2007. Jason Williamson cospe raiva sobre loops de laptop. Zero guitarra ao vivo. "Austerity Dogs" definiu o punk eletrônico da classe trabalhadora.',inf:['fall','pil','gang4','clash']},
+  {id:'jeff',   era:'indie00', name:'Jeff Rosenstock',       w:150, bio:'NY, 1990. O mestre do pop-punk DIY do século XXI. Todos os álbuns free to download. "WORRY." (2016) e "NO DREAM" (2020) são dois dos melhores discos punk das últimas décadas.',inf:['agstme','desc','greenday','fugazi']},
+  {id:'shame',  era:'indie00', name:'Shame',                 w:110, bio:'South London, 2014. O post-punk mais urgente da sua geração. "Songs of Praise" (2018) e "Drunk Tank Pink" (2021) mostram uma trajetória impressionante.',inf:['fall','gang4','fugazi','wire']},
+  {id:'turnst', era:'indie00', name:'Turnstile',             w:120, bio:'Baltimore, 2010. Hardcore que absorveu funk, R&B e shoegaze sem perder ferocidade. "Glow On" (2021) recebeu 9.0 do Pitchfork.',inf:['minor','fugazi','blackf','desc']},
+  {id:'cable',  era:'indie00', name:'Cable Ties',            w:120, bio:'Melbourne, 2014. Trio australiano que atualiza o riot grrrl para falar de degradação ambiental e misoginia sistêmica.',inf:['bikini','sleater','blackf','clashb']},
+  {id:'cpm22',  era:'indie00', name:'CPM 22 (BR)',           w:120, bio:'Barueri, SP, 1995. Hardcore melódico que chegou ao mainstream. Uma das únicas bandas de hardcore a ganhar disco de ouro e Grammy Latino de melhor álbum de rock brasileiro (2008).',inf:['deadfish','badrel','nofx','greenday']},
+  {id:'garagefuzz',era:'indie00',name:'Garage Fuzz (BR)',    w:145, bio:'Santos, SP, 1991. Uma das mais consistentes bandas de punk/hardcore brasileiro. Turnês ao lado de Fugazi e Seaweed. Referência de longevidade e integridade DIY no Brasil.',inf:['deadfish','fugazi','ratos','badrel']},
+  {id:'guitarwolf',era:'indie00',name:'Guitar Wolf (JP)',    w:140, bio:'Nagasaki, 1987. O trio mais barulhento e veloz do garage punk. Shows de 200bpm com volume ensurdecedor. "Jet Generation" (1999) é um clássico. Influência em Jack White e toda a cena garage revival.',inf:['ramones','garage','sonics','whites']},
+  {id:'teengene',era:'indie00', name:'Teengenerate (JP)',    w:145, bio:'Tóquio, 1990. Garage punk caótico e veloz. Considerados por muitos a melhor banda de 1994. Influência direta na cena garage punk americana dos anos 2000.',inf:['ramones','sonics','garage','guitarwolf']},
+  {id:'numbergirl',era:'indie00',name:'Number Girl (JP)',    w:145, bio:'Fukuoka, 1995. Post-hardcore e noise rock japonês. Comparados a Pixies, Sonic Youth e Hüsker Dü. Influência enorme na cena indie japonesa contemporânea.',inf:['sonic','pixies','husker','teengene']},
+  {id:'ttmuertos',era:'indie00',name:'Todos Tus Muertos (AR)',w:185,bio:'Buenos Aires, 1985. Punk + reggae + hardcore. Pioneiros da fusão punk-reggae na Argentina. "Nena de Hiroshima" (1991) é um clássico. Influência direta em toda cena latinoamericana de fusão.',inf:['violadores','clash','ratos']},
+  {id:'funpeople',era:'indie00',name:'Fun People (AR)',      w:135, bio:'La Plata, Argentina, 1990. Hardcore melódico politicamente engajado. Mais de 30 lançamentos. Daniel Acosta é uma lenda do hardcore latinoamericano.',inf:['attaque','minor','fugazi','badrel']},
+  {id:'fiskales',era:'indie00', name:'Fiskales Ad-Hok (CL)',w:160, bio:'Santiago, Chile, 1989. A banda de punk chileno mais longeva e popular. Misturaram punk com cumbia e ritmos latinoamericanos. Referência absoluta do punk chileno há mais de 30 anos.',inf:['pinochetb','ramones','clash','attaque']},
+
+  {id:'idles',  era:'today',   name:'IDLES',                w:110, bio:'Bristol, 2009. Joe Talbot transforma raiva pessoal em catarse coletiva. "IDLES does not exist without Gang of Four." "Brutalism" (2017) e "Joy as an Act of Resistance" (2018) são essenciais.',inf:['gang4','fugazi','fall','sleaf','proto']},
+  {id:'fontain',era:'today',   name:'Fontaines D.C.',       w:145, bio:'Dublin, 2014. Cinco estudantes de música que escreviam poesia juntos. "Dogrel" (2019) nomeado ao Mercury Prize. "Romance" (2024) recebeu duas nomeações ao Grammy.',inf:['joydiv','velvet','fall','cure','iceage','proto','strokes']},
+  {id:'drycl',  era:'today',   name:'Dry Cleaning',         w:135, bio:'London, 2017. Florence Shaw recita textos surreais e banais sobre guitarras angulosas. "New Long Leg" (2021) é o álbum de pós-punk mais inventivo da década.',inf:['fall','talkh','wire','sleaf','gang4']},
+  {id:'wetleg', era:'today',   name:'Wet Leg',              w:110, bio:'Isle of Wight, 2019. "Chaise Longue" viralizou antes do álbum existir. Humor seco e indie punk irreverente. Grammy de Melhor Álbum Alternativo em 2023.',inf:['sleater','pixies','buzzc','strokes']},
+  {id:'amyl',   era:'today',   name:'Amyl & the Sniffers',  w:165, bio:'Melbourne, 2016. Amy Taylor + Bryce Wilson + Dec Martens + Gus Romer. EP "Giddy Up" criado em 12 horas. Pub punk com energia de Iggy Pop e atitude de AC/DC. "Guided by Angels" é o hino. Abriram para AC/DC em 2025.',inf:['iggsolo','iggy','ramones','sleaf','minor','clashb','cable']},
+  {id:'viagra', era:'today',   name:'Viagra Boys',          w:135, bio:'Estocolmo, 2015. Sebastian Murphy cospe letras sobre masculinidade fracassada e vícios. Saxofone + baixo distorcido + vibe Nick Cave. "Cave World" (2022) é originalíssimo.',inf:['iggy','pil','fall','iceage','sonic']},
+  {id:'yard',   era:'today',   name:'Yard Act',             w:120, bio:'Leeds, 2019. James Smith recita monólogos satíricos sobre vida britânica pós-Brexit sobre grooves funky. "The Overload" (2022) é comparado ao Fall e Pulp.',inf:['fall','sleaf','parquet','wire']},
+  {id:'blackm', era:'today',   name:'Black Midi',           w:120, bio:'London, 2017. Três garotos do BRIT School fazem matemática-rock / avant-punk caótico. "Schlagenheim" (2019) é tecnicamente extraordinário.',inf:['sonic','fall','pil','talkh','wire']},
+  {id:'chubby', era:'today',   name:'Chubby & the Gang',   w:150, bio:'London, 2018. Charlie Manning-Walker e seus hardcore veteranos fazem Oi! punk moderno explosivo. "Speed Kills" (2020) foi uma das maiores surpresas da cena.',inf:['dkenn','blackf','damned','clash']},
+  {id:'flema',  era:'today',   name:'Flema (AR)',           w:120, bio:'Gerli, Buenos Aires, 1987. Punk nihilista e de culto. Ricky Espinosa — ícone trágico, suicidou-se em 2002. Letras sobre álcool, drogas, desesperança. Influência enorme no punk underground argentino.',inf:['violadores','ramones','pistols','dkenn']},
 ];
 
+const ERA_Y={roots:20,proto:130,wave1:240,postpunk:350,hc:460,alt90:570,indie00:680,today:800};
+
+const byEra={};
+BANDS_DEF.forEach(b=>{
+  if(!byEra[b.era])byEra[b.era]=[];
+  byEra[b.era].push(b);
+});
+
+let maxRight=0;
+Object.entries(byEra).forEach(([era,bands])=>{
+  let curX=START_X;
+  bands.forEach(b=>{
+    b.x=curX;
+    b.y=ERA_Y[era];
+    curX+=b.w+GAP;
+  });
+  if(curX>maxRight)maxRight=curX;
+});
+
+const SVG_W=maxRight+START_X;
+const SVG_H=870;
+
+const BANDS=BANDS_DEF;
 const BMAP=Object.fromEntries(BANDS.map(b=>[b.id,b]));
 let selected=null;
+
 const svg=document.getElementById('pt-svg');
+svg.setAttribute('viewBox',`0 0 ${SVG_W} ${SVG_H}`);
+svg.setAttribute('width',SVG_W);
+
 const NS='http://www.w3.org/2000/svg';
 function el(tag,a={}){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e;}
 
@@ -185,17 +236,17 @@ function cy(b){return b.y+24;}
 BANDS.forEach(b=>{
   const m=ERA_META[b.era];
   const g=el('g',{class:'pt-node','data-id':b.id});
-  const r=el('rect',{x:b.x,y:b.y,width:b.w,height:48,rx:'5',
+  const r=el('rect',{x:b.x,y:b.y,width:b.w,height:NODE_H,rx:'5',
     fill:m.f,stroke:m.c,'stroke-width':'0.8','fill-opacity':'0.9'});
-  const words=b.name.split(' ');
   const long=b.name.length>15;
   if(long){
+    const words=b.name.split(' ');
     const mid=Math.ceil(words.length/2);
     const l1=words.slice(0,mid).join(' ');
     const l2=words.slice(mid).join(' ');
     const t1=el('text',{x:cx(b),y:b.y+15,'text-anchor':'middle','dominant-baseline':'central',fill:m.t,'font-size':'10','font-weight':'500'});
     t1.textContent=l1;
-    const t2=el('text',{x:cx(b),y:b.y+28,'text-anchor':'middle','dominant-baseline':'central',fill:m.t,'font-size':'10','font-weight':'500'});
+    const t2=el('text',{x:cx(b),y:b.y+29,'text-anchor':'middle','dominant-baseline':'central',fill:m.t,'font-size':'10','font-weight':'500'});
     t2.textContent=l2;
     g.appendChild(r);g.appendChild(t1);g.appendChild(t2);
   }else{
@@ -214,7 +265,7 @@ BANDS.forEach(b=>{
   b.inf.forEach(sid=>{
     const src=BMAP[sid];if(!src)return;
     const key=sid+'->'+b.id;
-    const x1=cx(src),y1=src.y+48,x2=cx(b),y2=b.y;
+    const x1=cx(src),y1=src.y+NODE_H,x2=cx(b),y2=b.y;
     const my=(y1+y2)/2;
     const path=el('path',{
       d:`M${x1} ${y1} C${x1} ${my},${x2} ${my},${x2} ${y2}`,
@@ -254,12 +305,9 @@ function selectBand(id){
   });
   const m=ERA_META[b.era];
   const nameEl=document.getElementById('pt-bio-name');
-  nameEl.textContent=b.name;
-  nameEl.style.color=m.t;
+  nameEl.textContent=b.name;nameEl.style.color=m.t;
   const eraEl=document.getElementById('pt-bio-era');
-  eraEl.textContent=m.label;
-  eraEl.style.borderColor=m.c;
-  eraEl.style.color=m.t;
+  eraEl.textContent=m.label;eraEl.style.borderColor=m.c;eraEl.style.color=m.t;
   document.getElementById('pt-bio-text').textContent=b.bio;
   const chips=document.getElementById('pt-bio-chips');
   chips.innerHTML='';
@@ -269,8 +317,7 @@ function selectBand(id){
     [...directInf].forEach(iid=>{
       const ib=BMAP[iid];if(!ib)return;
       const c=document.createElement('span');c.className='pt-chip';
-      c.textContent=ib.name;c.style.borderColor=ERA_META[ib.era].c;
-      c.style.color=ERA_META[ib.era].t;
+      c.textContent=ib.name;c.style.borderColor=ERA_META[ib.era].c;c.style.color=ERA_META[ib.era].t;
       c.addEventListener('click',e=>{e.stopPropagation();selectBand(iid);});
       chips.appendChild(c);
     });
@@ -279,11 +326,10 @@ function selectBand(id){
     const lbl2=document.createElement('span');
     lbl2.className='pt-chip-label';lbl2.style.marginLeft='8px';
     lbl2.textContent='influenciou:';chips.appendChild(lbl2);
-    [...directDesc].slice(0,10).forEach(iid=>{
+    [...directDesc].slice(0,12).forEach(iid=>{
       const ib=BMAP[iid];if(!ib)return;
       const c=document.createElement('span');c.className='pt-chip';
-      c.textContent=ib.name;c.style.borderColor=ERA_META[ib.era].c;
-      c.style.color=ERA_META[ib.era].t;
+      c.textContent=ib.name;c.style.borderColor=ERA_META[ib.era].c;c.style.color=ERA_META[ib.era].t;
       c.addEventListener('click',e=>{e.stopPropagation();selectBand(iid);});
       chips.appendChild(c);
     });
